@@ -31,6 +31,13 @@ WIDTH = 1400
 HEIGHT = 800
 SCREEN_SIZE = (WIDTH, HEIGHT)
 
+class Edge():
+    def __init__(self, from_node, to_node):
+        self.from_node = from_node
+        self.to_node = to_node
+    def render(self, background):
+        pygame.draw.line(background, WHITE, (self.from_node.x_position, self.from_node.y_position), (self.to_node.x_position, self.to_node.y_position), 1)
+
 class Node():
     def __init__(self, size, color, data):
         self.y_position = None
@@ -58,8 +65,8 @@ class Node():
 class Tree():
     def __init__(self):
         self.nodes = []
-        self.adj_list = []
         self.root = None
+        self.edges = []
 
     def append_node(self, node):
         self.nodes.append(node)
@@ -82,9 +89,11 @@ class Tree():
         return downlevel
     
     # Returns level of given data value  
-    def get_level(self, node):
-    
+    def get_level(self, node):    
         return self.get_level_util(self.root, node.data, 1)
+
+    # def create_edge(self, from_node, to_node):
+    #     self.edges.append((from_node, to_node))
 
     def insert_in_tree(self, node):
         if self.root == None:
@@ -108,10 +117,12 @@ class Tree():
                     # ir para esquerda
                     temp = temp.node_left
                     if temp == None:
+
                         if self.get_level(parent) >= 5:
                             print(self.get_level(parent))
                             break
                         self.append_node(node)
+
                         parent.node_left = node
                         node.parent = parent
                         if left_side:
@@ -121,17 +132,21 @@ class Tree():
                         else:
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
                         node.y_position = parent.y_position + Y_DISTANCE
+                        
                         # fim da condição ir a direita
+                        self.edges.append(Edge(parent, node))
                         return
                 else:
                     left_side = False
                     # ir para direita
                     temp = temp.node_right
                     if temp == None:
+
                         if self.get_level(parent) >= 5:
                             print(self.get_level(parent))
                             break
                         self.append_node(node)
+
                         parent.node_right = node
                         node.parent = parent
                         if right_side:
@@ -141,7 +156,7 @@ class Tree():
                         else:
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
                         node.y_position = parent.y_position + Y_DISTANCE
-                        # fim da condição ir a direita
+                        self.edges.append(Edge(parent, node))
                         return
 
     # def get_nodes_for_level(self):
@@ -166,9 +181,10 @@ class Tree():
         
 
     def render(self, background):
+        for edge in self.edges:
+            edge.render(background)     
         for node in self.nodes:
             node.render(background)
-    
 
 class Game():
     def __init__(self):
