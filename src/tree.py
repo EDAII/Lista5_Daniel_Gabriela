@@ -44,7 +44,7 @@ class Node():
 
     def render(self, background):       
         circle = pygame.draw.circle(background, self.color, [self.x_position, self.y_position], self.size)
-        circle.center = (self.x_position + self.size/2 + 7, self.y_position + self.size/2 + 7)
+        circle.center = (self.x_position + self.size/2 + 5, self.y_position + self.size/2 + 7)
 
         font = pygame.font.Font('freesansbold.ttf', 15)
         text = font.render(str(self.data), True, BLACK, WHITE) 
@@ -159,8 +159,13 @@ class Game():
         # aqui já iremos ter o array de valores inseridos pelo usuário
         random_nodes = random.sample(range(1, 100), NODES_QTT)
         
+        # TODO: limitar para os 5 níveis da arvore para nao extrapolar os limites da tela
+        # TODO: implementar arvore vermelha e preta, os casos de inserção para fazer as rotações
+        # TODO: avl
+
+        # array com valores para preencher os 5 niveis da arvore para testes.
         n_nodes = [30, 20, 15, 10, 5, 12, 18, 19, 17, 25, 23, 24, 21, 28, 27, 29, 40, 45, 50, 55, 35, 33, 38, 43, 31, 34, 36, 39, 42, 44, 48]
-        for i in n_nodes:
+        for i in random_nodes:
             node = Node(NODE_SIZE, WHITE, i)
             tree.insert_in_tree(node)
 
