@@ -33,21 +33,23 @@ SCREEN_SIZE = (WIDTH, HEIGHT)
 
 class Node():
     def __init__(self, size, color, data):
-        self.parent = None
-        self.y_position = 0
-        self.x_position = 0
+        self.y_position = None
+        self.x_position = None
+        
         self.size = size
         self.color = color
-        self.node_left = None
-        self.node_right = None
         self.data = data
 
-    def render(self, background):       
+        self.parent = None
+        self.node_left = None
+        self.node_right = None
+
+    def render(self, background):
         circle = pygame.draw.circle(background, self.color, [self.x_position, self.y_position], self.size)
         circle.center = (self.x_position + self.size/2 + 5, self.y_position + self.size/2 + 7)
 
         font = pygame.font.Font('freesansbold.ttf', 15)
-        text = font.render(str(self.data), True, BLACK, WHITE) 
+        text = font.render(str(self.data), True, BLACK, WHITE)
 
         background.blit(text, circle)
     def __str__(self):
@@ -62,14 +64,36 @@ class Tree():
     def append_node(self, node):
         self.nodes.append(node)
 
-    def insert_in_tree(self, node):
-        self.append_node(node)
-        if self.root == None:
-          self.root = node
-          self.root.x_position = WIDTH // 2
-          self.root.y_position = MARGIN
+    # Helper function for getLevel(). It  
+    # returns level of the data if data is  
+    # present in tree, otherwise returns 0 
+    def get_level_util(self, node, data, level):
+        if (node == None):
+            return 0
+    
+        if (node.data == data):
+            return level
+    
+        downlevel = self.get_level_util(node.node_left, data, level + 1)
+        if (downlevel != 0):
+            return downlevel
+    
+        downlevel = self.get_level_util(node.node_right, data, level + 1)
+        return downlevel
+    
+    # Returns level of given data value  
+    def get_level(self, node):
+    
+        return self.get_level_util(self.root, node.data, 1)
 
-        else: 
+    def insert_in_tree(self, node):
+        if self.root == None:
+            self.root = node
+            self.root.x_position = WIDTH // 2
+            self.root.y_position = MARGIN
+            self.append_node(node)
+
+        else:
             # se nao for a raiz
             temp = self.root
 
@@ -78,22 +102,25 @@ class Tree():
 
             while True:
                 parent = temp
+                print(str(parent.data) + " " + str(self.get_level(parent)))
                 if node.data <= temp.data:
                     right_side = False
                     # ir para esquerda
                     temp = temp.node_left
                     if temp == None:
+                        if self.get_level(parent) >= 5:
+                            print(self.get_level(parent))
+                            break
+                        self.append_node(node)
                         parent.node_left = node
                         node.parent = parent
                         if left_side:
                             node.x_position = parent.x_position // 2
-                            node.y_position = parent.y_position + Y_DISTANCE
                         elif node == parent.node_left and parent == parent.parent.node_left:
                             node.x_position = ((parent.x_position + parent.parent.x_position) // 2) - (parent.parent.x_position - parent.x_position)
-                            node.y_position = parent.y_position + Y_DISTANCE
                         else:
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
-                            node.y_position = parent.y_position + Y_DISTANCE
+                        node.y_position = parent.y_position + Y_DISTANCE
                         # fim da condição ir a direita
                         return
                 else:
@@ -101,39 +128,41 @@ class Tree():
                     # ir para direita
                     temp = temp.node_right
                     if temp == None:
+                        if self.get_level(parent) >= 5:
+                            print(self.get_level(parent))
+                            break
+                        self.append_node(node)
                         parent.node_right = node
                         node.parent = parent
                         if right_side:
                             node.x_position = (WIDTH + parent.x_position) // 2
-                            node.y_position = parent.y_position + Y_DISTANCE
                         elif node == parent.node_right and parent == parent.parent.node_right:
                             node.x_position = ((parent.x_position + parent.parent.x_position) // 2) + (parent.x_position - parent.parent.x_position)
-                            node.y_position = parent.y_position + Y_DISTANCE
                         else:
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
-                            node.y_position = parent.y_position + Y_DISTANCE
+                        node.y_position = parent.y_position + Y_DISTANCE
                         # fim da condição ir a direita
                         return
 
-    def get_nodes_for_level(self):          
-        if self.root is None: 
-            return []
-        # Create an empty queue for level order traversal 
-        queue = []         
-        # Enqueue root and initialize height 
-        queue.append(self.root)
+    # def get_nodes_for_level(self):
+    #     if self.root is None: 
+    #         return []
+    #     # Create an empty queue for level order traversal
+    #     queue = []
+    #     # Enqueue root and initialize height
+    #     queue.append(self.root)
 
-        while queue:
-            count = len(queue)
-            while count > 0:
-                temp = queue.pop(0)
-                self.nodes.append(temp)
-                if temp.node_left:
-                    queue.append(temp.node_left)
-                if temp.node_right:
-                    queue.append(temp.node_right)
+    #     while queue:
+    #         count = len(queue)
+    #         while count > 0:
+    #             temp = queue.pop(0)
+    #             self.nodes.append(temp)
+    #             if temp.node_left:
+    #                 queue.append(temp.node_left)
+    #             if temp.node_right:
+    #                 queue.append(temp.node_right)
 
-                count -= 1
+    #             count -= 1
         
 
     def render(self, background):
@@ -158,7 +187,7 @@ class Game():
 
         # aqui já iremos ter o array de valores inseridos pelo usuário
         random_nodes = random.sample(range(1, 100), NODES_QTT)
-        
+
         # TODO: limitar para os 5 níveis da arvore para nao extrapolar os limites da tela
         # TODO: implementar arvore vermelha e preta, os casos de inserção para fazer as rotações
         # TODO: avl
@@ -169,15 +198,16 @@ class Game():
             node = Node(NODE_SIZE, WHITE, i)
             tree.insert_in_tree(node)
 
-        tree.get_nodes_for_level()
+        # tree.get_nodes_for_level()
 
-        for node in tree.nodes:
-            print(node.data)
-            if node.node_left:
-                print(node.node_left.data)
-            if node.node_right:
-                print(node.node_right.data)
-            print("_________________")
+        # for node in tree.nodes:
+        #     print(node.data)
+        #     if node.node_left:
+        #         print(node.node_left.data)
+        #     if node.node_right:
+        #         print(node.node_right.data)
+        #     print("_________________")
+
         return tree
         
     def render(self):
