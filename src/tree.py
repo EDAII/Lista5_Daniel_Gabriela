@@ -62,22 +62,6 @@ class Tree():
     def append_node(self, node):
         self.nodes.append(node)
 
-    # def insert_in_tree(self, node): 
-    #     if self.root is None: 
-    #         self.root = node
-    #     else: 
-
-    #         if root.val < node.val: 
-    #             if root.right is None: 
-    #                 root.right = node 
-    #             else: 
-    #                 self.insert_in_tree(root.right, node) 
-    #         else: 
-    #             if root.left is None: 
-    #                 root.left = node 
-    #             else: 
-    #                 self.insert_in_tree(root.left, node) 
-    
     def insert_in_tree(self, node):
         self.append_node(node)
         if self.root == None:
@@ -110,10 +94,7 @@ class Tree():
                         else:
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
                             node.y_position = parent.y_position + Y_DISTANCE
-                        # if left_tree:
-                        # else:
-                        #     temp.node_left.x_position = temp.x_position -  (WIDTH - temp.x_position) // 2
-                        #     temp.node_left.y_position = temp.y_position + Y_DISTANCE
+                        # fim da condição ir a direita
                         return
                 else:
                     left_side = False
@@ -131,9 +112,7 @@ class Tree():
                         else:
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
                             node.y_position = parent.y_position + Y_DISTANCE
-                        # temp.node_right.x_position = (temp.x_position + WIDTH) // 2 # temp.x_position  + temp.x_position // 2
-                        # temp.node_right.y_position = temp.y_position + Y_DISTANCE
-                         # fim da condição ir a direita
+                        # fim da condição ir a direita
                         return
 
     def get_nodes_for_level(self):          
@@ -179,30 +158,13 @@ class Game():
 
         # aqui já iremos ter o array de valores inseridos pelo usuário
         random_nodes = random.sample(range(1, 100), NODES_QTT)
-        # erros: 19, 21, 28, 27, 29
+        
         n_nodes = [30, 20, 15, 10, 5, 12, 18, 19, 17, 25, 23, 24, 21, 28, 27, 29, 40, 45, 50, 55, 35, 33, 38, 43, 31, 34, 36, 39, 42, 44, 48]
         for i in n_nodes:
             node = Node(NODE_SIZE, WHITE, i)
             tree.insert_in_tree(node)
 
-        # TODO verificar se a raíz é nula
-        # após ter a árvore formada, fazemos uma travessia por níveis
         tree.get_nodes_for_level()
-        # 9 niveis eh o maximo com a tela de 800 de altura
-
-        # inserir, travessia -> verificar onde ele vai ser colocado, pegar a posição com referencia pro pai e criar as arestas
-
-        # initial_size = WIDTH // 2
-        # count = 0
-        # for h in range(40, 90 * 5 + 40, 90):
-        #     for pos in range(initial_size, WIDTH, initial_size * 2):
-        #         # node = Node([pos, h], 25, WHITE, random.randint(0, 100))
-        #         #insere as posições
-        #         tree.nodes[count].position.append(pos)
-        #         tree.nodes[count].position.append(h)         
-        #         count += 1
-
-        #     initial_size = initial_size // 2
 
         for node in tree.nodes:
             print(node.data)
