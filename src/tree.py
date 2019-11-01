@@ -128,19 +128,20 @@ class Tree():
             
             while True:
                 parent = temp
+                if self.get_level(parent) >= 5:
+                    print("Erro, insira outro nó")
+                    break
                 if node.data <= temp.data:
                     right_side = False
                     temp = temp.node_left
 
-                    if temp.data == -1:
-                        self.edges.remove(self.get_edge(parent, temp))
-                        self.nodes.remove(temp)
-                        temp = None
-                        
+                    if temp != None:
+                        if temp.data == -1:
+                            self.edges.remove(self.get_edge(parent, temp))
+                            self.nodes.remove(temp)
+                            temp = None
+
                     if temp == None:
-                        if self.get_level(parent) >= 5:
-                            print("Erro, insira outro nó")
-                            break
                         parent.node_left = node
                         node.parent = parent
                         self.append_node(node)
@@ -173,15 +174,13 @@ class Tree():
                     left_side = False
                     temp = temp.node_right
 
-                    if temp.data == -1:
-                        self.edges.remove(self.get_edge(parent, temp))
-                        self.nodes.remove(temp)
-                        temp = None
+                    if temp != None:
+                        if temp.data == -1:
+                            self.edges.remove(self.get_edge(parent, temp))
+                            self.nodes.remove(temp)
+                            temp = None
 
                     if temp == None:
-                        if self.get_level(parent) >= 5:
-                            print("Erro, insira outro nó")
-                            break
                         parent.node_right = node
                         node.parent = parent
 
@@ -248,9 +247,9 @@ class Game():
 
     def render(self):
         self.background.fill(SCREEN_BACKGROUND_COLOR)
-        print(self.tree.nodes)
         node_value = int(input("Digite o valor do nó:"))
         # TODO: tratamento de erro de input
+        # TODO: tornar os numeros dentro da arvore como unique
         self.tree.insert_in_tree(Node(RED, node_value, Node(BLACK, -1, None, None), Node(BLACK, -1, None, None)))
         if(self.option == "1"):
             pass
