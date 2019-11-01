@@ -75,6 +75,12 @@ class Tree():
         self.edges = []
         self.root = None
 
+    def verify_exist_value(self, value):
+        for node in self.nodes:
+            if value == node.data:
+                return True
+        return False
+
     def get_edge(self, from_node, to_node):
         for edge in self.edges:
             if edge.from_node == from_node and edge.to_node == to_node:
@@ -248,9 +254,13 @@ class Game():
     def render(self):
         self.background.fill(SCREEN_BACKGROUND_COLOR)
         node_value = int(input("Digite o valor do nó:"))
+        if self.tree.verify_exist_value(node_value):
+            print("Este valor já foi inserido na arvore")
+        else:
+            self.tree.insert_in_tree(Node(RED, node_value, Node(BLACK, -1, None, None), Node(BLACK, -1, None, None)))
+
         # TODO: tratamento de erro de input
         # TODO: tornar os numeros dentro da arvore como unique
-        self.tree.insert_in_tree(Node(RED, node_value, Node(BLACK, -1, None, None), Node(BLACK, -1, None, None)))
         if(self.option == "1"):
             pass
         elif(self.option == "2"):
