@@ -31,6 +31,9 @@ WIDTH = 1330
 HEIGHT = 800
 SCREEN_SIZE = (WIDTH, HEIGHT)
 
+# red and black insert cases
+
+
 class Edge():
     def __init__(self, from_node, to_node):
         self.from_node = from_node
@@ -42,7 +45,7 @@ class Edge():
                         (self.to_node.x_position, self.to_node.y_position), 1)
 
 class Node():
-    def __init__(self, color, data):
+    def __init__(self, color, data, node_left, node_right):
         self.y_position = None
         self.x_position = None
         
@@ -51,8 +54,8 @@ class Node():
         self.data = data
 
         self.parent = None
-        self.node_left = None
-        self.node_right = None
+        self.node_left = node_left
+        self.node_right = node_right
 
     def render(self, background):
         circle = pygame.draw.circle(background, self.color, [self.x_position, self.y_position], self.size)
@@ -69,8 +72,14 @@ class Node():
 class Tree():
     def __init__(self):
         self.nodes = []
-        self.root = None
         self.edges = []
+        self.root = None
+
+    def get_edge(self, from_node, to_node):
+        for edge in self.edges:
+            if edge.from_node == from_node and edge.to_node == to_node:
+                return edge
+        return None
 
     def append_node(self, node):
         self.nodes.append(node)
@@ -89,7 +98,7 @@ class Tree():
         downlevel = self.get_level_util(node.node_right, data, level + 1)
         return downlevel
     
-    def get_level(self, node):    
+    def get_level(self, node):
         return self.get_level_util(self.root, node.data, 1)
 
     def insert_in_tree(self, node):
@@ -97,7 +106,20 @@ class Tree():
             self.root = node
             self.root.x_position = WIDTH // 2
             self.root.y_position = MARGIN
+
             self.append_node(node)
+            if node.node_right != None:
+                self.append_node(node.node_right)
+                self.edges.append(Edge(node, node.node_right))
+                node.node_right.parent = node
+                node.node_right.x_position = node.x_position + 30
+                node.node_right.y_position = node.y_position + Y_DISTANCE
+            if node.node_left != None:
+                self.append_node(node.node_left)
+                self.edges.append(Edge(node, node.node_left))
+                node.node_left.parent = node
+                node.node_left.x_position = node.x_position - 30
+                node.node_left.y_position = node.y_position + Y_DISTANCE
 
         else:
             temp = self.root
@@ -109,14 +131,20 @@ class Tree():
                 if node.data <= temp.data:
                     right_side = False
                     temp = temp.node_left
-                    if temp == None:
 
+                    if temp.data == -1:
+                        self.edges.remove(self.get_edge(parent, temp))
+                        self.nodes.remove(temp)
+                        temp = None
+                        
+                    if temp == None:
                         if self.get_level(parent) >= 5:
                             print("Erro, insira outro nó")
                             break
                         parent.node_left = node
                         node.parent = parent
                         self.append_node(node)
+
                         self.edges.append(Edge(parent, node))
 
                         if left_side:
@@ -127,18 +155,38 @@ class Tree():
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
                         node.y_position = parent.y_position + Y_DISTANCE
                         
+                        if node.node_right != None:
+                            self.append_node(node.node_right)
+                            self.edges.append(Edge(node, node.node_right))
+                            node.node_right.parent = node
+                            node.node_right.x_position = node.x_position + 30
+                            node.node_right.y_position = node.y_position + Y_DISTANCE
+                        if node.node_left != None:
+                            self.append_node(node.node_left)
+                            self.edges.append(Edge(node, node.node_left))
+                            node.node_left.parent = node
+                            node.node_left.x_position = node.x_position - 30
+                            node.node_left.y_position = node.y_position + Y_DISTANCE
+
                         return
                 else:
                     left_side = False
                     temp = temp.node_right
-                    if temp == None:
 
+                    if temp.data == -1:
+                        self.edges.remove(self.get_edge(parent, temp))
+                        self.nodes.remove(temp)
+                        temp = None
+
+                    if temp == None:
                         if self.get_level(parent) >= 5:
                             print("Erro, insira outro nó")
                             break
-                        self.append_node(node)
                         parent.node_right = node
                         node.parent = parent
+
+                        self.append_node(node)
+
                         self.edges.append(Edge(parent, node))
 
                         if right_side:
@@ -148,7 +196,34 @@ class Tree():
                         else:
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
                         node.y_position = parent.y_position + Y_DISTANCE
+                        
+                        if node.node_right != None:
+                            self.append_node(node.node_right)
+                            self.edges.append(Edge(node, node.node_right))
+                            node.node_right.parent = node
+                            node.node_right.x_position = node.x_position + 30
+                            node.node_right.y_position = node.y_position + Y_DISTANCE
+                        if node.node_left != None:
+                            self.append_node(node.node_left)
+                            self.edges.append(Edge(node, node.node_left))
+                            node.node_left.parent = node
+                            node.node_left.x_position = node.x_position - 30
+                            node.node_left.y_position = node.y_position + Y_DISTANCE
                         return
+
+    def grandpa(self, node):
+        if node != None and node.parent != None:
+            return (node.parent).parent
+        else:
+            return None
+
+    def uncle(self, node):
+        if self.grandpa(node) == None:
+            return None
+        if node.parent == self.grandpa(node).node_left:
+            return self.grandpa(node).node_right
+        else:
+            return self.grandpa(node).node_left
 
     def render(self, background):
         for edge in self.edges:
@@ -173,9 +248,10 @@ class Game():
 
     def render(self):
         self.background.fill(SCREEN_BACKGROUND_COLOR)
+        print(self.tree.nodes)
         node_value = int(input("Digite o valor do nó:"))
         # TODO: tratamento de erro de input
-        self.tree.insert_in_tree(Node(RED, node_value))
+        self.tree.insert_in_tree(Node(RED, node_value, Node(BLACK, -1, None, None), Node(BLACK, -1, None, None)))
         if(self.option == "1"):
             pass
         elif(self.option == "2"):
