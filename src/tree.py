@@ -101,12 +101,10 @@ class Tree():
 
         else:
             temp = self.root
-
             right_side = True
             left_side = True
             
-            error = False
-            while not error:
+            while True:
                 parent = temp
                 if node.data <= temp.data:
                     right_side = False
@@ -114,7 +112,6 @@ class Tree():
                     if temp == None:
 
                         if self.get_level(parent) >= 5:
-                            error = True
                             print("Erro, insira outro nó")
                             break
                         parent.node_left = node
@@ -137,9 +134,8 @@ class Tree():
                     if temp == None:
 
                         if self.get_level(parent) >= 5:
-                            error = True
                             print("Erro, insira outro nó")
-
+                            break
                         self.append_node(node)
                         parent.node_right = node
                         node.parent = parent
@@ -168,15 +164,17 @@ class Game():
             print('The pygame module did not start successfully')
 
         self.background = pygame.display.set_mode(SCREEN_SIZE)
-        self.background.fill(SCREEN_BACKGROUND_COLOR)
         pygame.display.set_caption('Tree')
+        self.background.fill(SCREEN_BACKGROUND_COLOR)
         pygame.display.update()
 
         self.option = option
         self.tree = Tree()
 
     def render(self):
+        self.background.fill(SCREEN_BACKGROUND_COLOR)
         node_value = int(input("Digite o valor do nó:"))
+        # TODO: tratamento de erro de input
         self.tree.insert_in_tree(Node(RED, node_value))
         if(self.option == "1"):
             pass
@@ -184,6 +182,7 @@ class Game():
             pass
         else:
             self.tree.render(self.background)
+        pygame.display.update()
 
     def run(self):
         exit = False
