@@ -19,7 +19,7 @@ LIGHTBLUE = (60, 170, 255)
 DARKBLUE = (0, 101, 178)
 BEIGE = (178, 168, 152)
 
-SCREEN_BACKGROUND_COLOR = BLACK
+SCREEN_BACKGROUND_COLOR = WHITE
 
 NODE_SIZE = 25
 NODES_QTT = 31
@@ -36,14 +36,17 @@ class Edge():
         self.from_node = from_node
         self.to_node = to_node
     def render(self, background):
-        pygame.draw.line(background, WHITE, (self.from_node.x_position, self.from_node.y_position), (self.to_node.x_position, self.to_node.y_position), 1)
+        pygame.draw.line(background, 
+                        BLACK, 
+                        (self.from_node.x_position, self.from_node.y_position), 
+                        (self.to_node.x_position, self.to_node.y_position), 1)
 
 class Node():
-    def __init__(self, size, color, data):
+    def __init__(self, color, data):
         self.y_position = None
         self.x_position = None
         
-        self.size = size
+        self.size = NODE_SIZE
         self.color = color
         self.data = data
 
@@ -53,12 +56,13 @@ class Node():
 
     def render(self, background):
         circle = pygame.draw.circle(background, self.color, [self.x_position, self.y_position], self.size)
-        circle.center = (self.x_position + self.size/2 + 5, self.y_position + self.size/2 + 7)
+        circle.center = (self.x_position + self.size//2 + 5, self.y_position + self.size//2 + 7)
 
         font = pygame.font.Font('freesansbold.ttf', 15)
-        text = font.render(str(self.data), True, BLACK, WHITE)
+        text = font.render(str('{:02d}'.format(self.data)), True, WHITE, self.color)
 
         background.blit(text, circle)
+
     def __str__(self):
         return str(self.data)
 
@@ -71,9 +75,6 @@ class Tree():
     def append_node(self, node):
         self.nodes.append(node)
 
-    # Helper function for getLevel(). It  
-    # returns level of the data if data is  
-    # present in tree, otherwise returns 0 
     def get_level_util(self, node, data, level):
         if (node == None):
             return 0
@@ -88,12 +89,8 @@ class Tree():
         downlevel = self.get_level_util(node.node_right, data, level + 1)
         return downlevel
     
-    # Returns level of given data value  
     def get_level(self, node):    
         return self.get_level_util(self.root, node.data, 1)
-
-    # def create_edge(self, from_node, to_node):
-    #     self.edges.append((from_node, to_node))
 
     def insert_in_tree(self, node):
         if self.root == None:
@@ -103,28 +100,28 @@ class Tree():
             self.append_node(node)
 
         else:
-            # se nao for a raiz
             temp = self.root
 
             right_side = True
             left_side = True
-
-            while True:
+            
+            error = False
+            while not error:
                 parent = temp
-                print(str(parent.data) + " " + str(self.get_level(parent)))
                 if node.data <= temp.data:
                     right_side = False
-                    # ir para esquerda
                     temp = temp.node_left
                     if temp == None:
 
                         if self.get_level(parent) >= 5:
-                            print(self.get_level(parent))
+                            error = True
+                            print("Erro, insira outro nó")
                             break
-                        self.append_node(node)
-
                         parent.node_left = node
                         node.parent = parent
+                        self.append_node(node)
+                        self.edges.append(Edge(parent, node))
+
                         if left_side:
                             node.x_position = parent.x_position // 2
                         elif node == parent.node_left and parent == parent.parent.node_left:
@@ -133,22 +130,21 @@ class Tree():
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
                         node.y_position = parent.y_position + Y_DISTANCE
                         
-                        # fim da condição ir a direita
-                        self.edges.append(Edge(parent, node))
                         return
                 else:
                     left_side = False
-                    # ir para direita
                     temp = temp.node_right
                     if temp == None:
 
                         if self.get_level(parent) >= 5:
-                            print(self.get_level(parent))
-                            break
-                        self.append_node(node)
+                            error = True
+                            print("Erro, insira outro nó")
 
+                        self.append_node(node)
                         parent.node_right = node
                         node.parent = parent
+                        self.edges.append(Edge(parent, node))
+
                         if right_side:
                             node.x_position = (WIDTH + parent.x_position) // 2
                         elif node == parent.node_right and parent == parent.parent.node_right:
@@ -156,29 +152,7 @@ class Tree():
                         else:
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
                         node.y_position = parent.y_position + Y_DISTANCE
-                        self.edges.append(Edge(parent, node))
                         return
-
-    # def get_nodes_for_level(self):
-    #     if self.root is None: 
-    #         return []
-    #     # Create an empty queue for level order traversal
-    #     queue = []
-    #     # Enqueue root and initialize height
-    #     queue.append(self.root)
-
-    #     while queue:
-    #         count = len(queue)
-    #         while count > 0:
-    #             temp = queue.pop(0)
-    #             self.nodes.append(temp)
-    #             if temp.node_left:
-    #                 queue.append(temp.node_left)
-    #             if temp.node_right:
-    #                 queue.append(temp.node_right)
-
-    #             count -= 1
-        
 
     def render(self, background):
         for edge in self.edges:
@@ -187,47 +161,29 @@ class Tree():
             node.render(background)
 
 class Game():
-    def __init__(self):
+    def __init__(self, option):
         try:
             pygame.init()
         except:
             print('The pygame module did not start successfully')
 
         self.background = pygame.display.set_mode(SCREEN_SIZE)
+        self.background.fill(SCREEN_BACKGROUND_COLOR)
         pygame.display.set_caption('Tree')
+        pygame.display.update()
 
-        self.tree = self.create_tree()
+        self.option = option
+        self.tree = Tree()
 
-    def create_tree(self):
-        tree = Tree()
-
-        # aqui já iremos ter o array de valores inseridos pelo usuário
-        random_nodes = random.sample(range(1, 100), NODES_QTT)
-
-        # TODO: limitar para os 5 níveis da arvore para nao extrapolar os limites da tela
-        # TODO: implementar arvore vermelha e preta, os casos de inserção para fazer as rotações
-        # TODO: avl
-
-        # array com valores para preencher os 5 niveis da arvore para testes.
-        n_nodes = [30, 20, 15, 10, 5, 12, 18, 19, 17, 25, 23, 24, 21, 28, 27, 29, 40, 45, 50, 55, 35, 33, 38, 43, 31, 34, 36, 39, 42, 44, 48]
-        for i in random_nodes:
-            node = Node(NODE_SIZE, WHITE, i)
-            tree.insert_in_tree(node)
-
-        # tree.get_nodes_for_level()
-
-        # for node in tree.nodes:
-        #     print(node.data)
-        #     if node.node_left:
-        #         print(node.node_left.data)
-        #     if node.node_right:
-        #         print(node.node_right.data)
-        #     print("_________________")
-
-        return tree
-        
     def render(self):
-        self.tree.render(self.background)
+        node_value = int(input("Digite o valor do nó:"))
+        self.tree.insert_in_tree(Node(RED, node_value))
+        if(self.option == "1"):
+            pass
+        elif(self.option == "2"):
+            pass
+        else:
+            self.tree.render(self.background)
 
     def run(self):
         exit = False
@@ -238,7 +194,8 @@ class Game():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         exit = True
-
+            
+            # TODO: render rodar sobre thread
             self.render()
             pygame.display.update()
 
@@ -246,10 +203,22 @@ class Game():
         sys.exit(0)
 
 
-def main():
-    mygame = Game()
-    mygame.run()
+def menu():
+    option = 0
+    while(option != "1" and option != "2" and option != "3"):
+        if(option != 0):
+            print("!!!! Opção Inválida !!!!\n")
+        print("\nEscolha o tipo de árvore:\n")
+        print("1 - Árvore AVL")
+        print("2 - Árvore Vermelho e Preto")
+        print("3 - Árvore Binária de Busca\n")
+        option = input()
+    return option
 
+def main():
+    option = menu()
+    mygame = Game(option)
+    mygame.run()
 
 if __name__ == '__main__':
     try:
