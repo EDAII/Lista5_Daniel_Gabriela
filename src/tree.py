@@ -1,6 +1,7 @@
 import sys
 import pygame
 import random
+import copy
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -31,13 +32,12 @@ WIDTH = 1330
 HEIGHT = 800
 SCREEN_SIZE = (WIDTH, HEIGHT)
 
-# red and black insert cases
-
 
 class Edge():
     def __init__(self, from_node, to_node):
         self.from_node = from_node
         self.to_node = to_node
+
     def render(self, background):
         pygame.draw.line(background, 
                         BLACK, 
@@ -56,7 +56,7 @@ class Node():
         self.parent = None
         self.node_left = node_left
         self.node_right = node_right
-
+    
     def render(self, background):
         circle = pygame.draw.circle(background, self.color, [self.x_position, self.y_position], self.size)
         circle.center = (self.x_position + self.size//2 + 5, self.y_position + self.size//2 + 7)
@@ -80,6 +80,7 @@ class Tree():
             if value == node.data:
                 return True
         return False
+
 
     def get_edge(self, from_node, to_node):
         for edge in self.edges:
@@ -143,6 +144,7 @@ class Tree():
 
                     if temp != None:
                         if temp.data == -1:
+
                             self.edges.remove(self.get_edge(parent, temp))
                             self.nodes.remove(temp)
                             temp = None
@@ -174,7 +176,6 @@ class Tree():
                             node.node_left.parent = node
                             node.node_left.x_position = node.x_position - 30
                             node.node_left.y_position = node.y_position + Y_DISTANCE
-
                         return
                 else:
                     left_side = False
@@ -230,6 +231,204 @@ class Tree():
         else:
             return self.grandpa(node).node_left
 
+################################################################
+    
+    def get_node_array(self, value):
+        print(value)
+        for node in self.nodes:
+            if node.data == value:
+                return node        
+        return None
+
+    def remove_background_node(self, node):
+        for n in self.nodes:
+            if node.x_position == n.x_position and node.y_position == n.y_position:
+                self.nodes.remove(n)
+
+    def insert_in_tree_RB(self, node):
+        self.insert_in_tree(node)
+        self.insercao_caso1(node)
+
+    def print_node(self, node):
+        print(str(node.data) + " - " + str(node.x_position) + " - " + str(node.y_position) + " - " + str(node.color))
+
+    def insert_in_node_position(self, node1, node2):
+        temp = node1.copy()
+        node1.x_position = node2.x_position
+        node1.y_position = node2.y_position
+        node2.x_position = temp.x_position
+        node2.y_position = temp.y_position
+
+        #TODO atualizar pai
+        #TODO atualizar arestas
+# ---------------------------------------------------------------
+    # def rotacionar_direita(self, node):
+        # q = copy.copy(node.node_left)
+        # temp = copy.copy(q.node_right)
+
+        # self.print_node(node)
+        # self.print_node(q)
+        # self.print_node(temp)
+
+        # print("----------------")
+
+        # # node.node_right = node
+        # self.insert_in_node_position(node.node_right, node)
+        # # node.node_left = temp
+        # self.insert_in_node_position(node.node_left, temp)
+        # # node = q
+        # self.insert_in_node_position(node, q)
+
+
+        # self.print_node(node)
+        # self.print_node(q)
+        # self.print_node(temp)
+
+    # def rotacionar_esquerda(self, node):
+    #     print("rot esq")
+
+    #     x = copy.copy(node.node_right)
+
+    #     # node.node_right = x.node_left
+    #     self.insert_in_node_position(node.node_right, x.node_left)
+    #     # x.node_left = node
+    #     self.insert_in_node_position(x.node_left, node)        
+    #     x.color = node.color
+    #     node.color = RED
+
+    # # # # def rotacionar_direita(node):
+    # # # # x = node.node_left
+    # # # # node.node_left = x.node_right
+    # # # # x.node_right = node
+    # # # # x.color = node.color
+    # # # # node.color = RED
+
+    # # # # def rotacionar_esquerda(node):
+    # # # #     x = node.node_right
+    # # # #     node.node_right = x.node_left
+    # # # #     x.node_left = node
+    # # # #     x.color = node.color
+    # # # #     node.color = RED
+
+    def rotacionar_direita(self, node):
+        print('rotacao direita')
+        q = node.node_left
+        # atualiza o pai de node para o novo filho
+        if node.parent != None:
+            if node == node.parent.node_left:
+                self.edges.remove(self.get_edge(node.parent, node.parent.node_left))
+                node.parent.node_left = q
+                self.edges.append(Edge(node.parent, q))
+            else:
+                self.edges.remove(self.get_edge(node.parent, node.parent.node_right))
+                node.parent.node_right = q
+                self.edges.append(Edge(node.parent, q))
+            # fim da atualizacao
+
+        self.edges.remove(self.get_edge(q, q.node_right))
+        node.node_left = q.node_right
+        self.edges.append(Edge(node, q.node_right))
+
+        self.edges.remove(self.get_edge(node, q))
+
+        q.node_right = node
+        self.edges.append(Edge(q, node))
+        q.parent = node.parent
+        node.parent = q
+
+
+    def rotacionar_esquerda(self, node):
+        print("rotacao esquerda")
+        q = node.node_right
+
+        # atualiza o pai de node para o novo filho
+        if node.parent != None:
+            if node == node.parent.node_left:
+                self.edges.remove(self.get_edge(node.parent, node.parent.node_left))
+                node.parent.node_left = q
+                self.edges.append(Edge(node.parent, q))
+            else:
+                self.edges.remove(self.get_edge(node.parent, node.parent.node_right))
+                node.parent.node_right = q
+                self.edges.append(Edge(node.parent, q))
+            # fim da atualizacao
+
+        self.edges.remove(self.get_edge(q, q.node_left))
+        node.node_right = q.node_left
+        self.edges.append(Edge(node, q.node_left))
+
+        self.edges.remove(self.get_edge(node, q))
+
+        q.node_left = node
+        self.edges.append(Edge(q, node))
+        q.parent = node.parent
+        node.parent = q
+
+    def insercao_caso1(self, node):
+        if node.parent == None:
+            print('caso 1')
+            node.color = BLACK
+        else:
+            self.insercao_caso2(node)
+
+    def insercao_caso2(self, node):
+        if node.parent.color == BLACK:
+            print('caso 2')
+            return
+        else:
+            self.insercao_caso3(node)
+
+    def insercao_caso3(self, node):
+        uncle_node = self.uncle(node)
+
+        if uncle_node != None and uncle_node.color == RED:
+            print('caso 3')
+            node.parent.color = BLACK
+            uncle_node.color = BLACK
+            g = self.grandpa(node)
+            g.color = RED
+            self.insercao_caso1(g)
+        else:
+            self.insercao_caso4(node)
+
+    def insercao_caso4(self, node):
+        print("caso 4")
+        g = self.grandpa(node)
+
+        if node == node.parent.node_right and node.parent == g.node_left:
+            self.rotacionar_esquerda(node.parent)
+            node = node.node_left
+
+        elif node == node.parent.node_left and node.parent == g.node_right:
+            self.rotacionar_direita(node.parent)
+            node = node.node_right
+
+        self.insercao_caso5(node)
+
+    def insercao_caso5(self, node):
+        print("caso 5")
+        g = self.grandpa(node)
+        print(g)
+
+        node.parent.color = BLACK
+        g.color = RED
+        if node == node.parent.node_left and node.parent == g.node_left:
+            self.rotacionar_direita(g)
+        else:
+            # aqui eh: node == node.parent.node_right and node.parent == g.node_right
+            self.rotacionar_esquerda(g)
+
+    def black_height_recursive(node):
+        altura = 0
+        if node != None:
+            if no.color == BLACK:
+                altura = 1 + max(self.black_height_recursive(node.node_left), self.black_height_recursive(node.node_right))
+            else:
+                altura = max(self.black_height_recursive(node.node_left), self.black_height_recursive(node.node_right))
+        return altura
+
+# --------------------------------------------------------------
+
     def render(self, background):
         for edge in self.edges:
             edge.render(background)     
@@ -244,8 +443,8 @@ class Game():
             print('The pygame module did not start successfully')
 
         self.background = pygame.display.set_mode(SCREEN_SIZE)
-        pygame.display.set_caption('Tree')
         self.background.fill(SCREEN_BACKGROUND_COLOR)
+        pygame.display.set_caption('Tree')
         pygame.display.update()
 
         self.option = option
@@ -253,20 +452,30 @@ class Game():
 
     def render(self):
         self.background.fill(SCREEN_BACKGROUND_COLOR)
+
         node_value = int(input("Digite o valor do nó:"))
+
         if self.tree.verify_exist_value(node_value):
             print("Este valor já foi inserido na arvore")
-        else:
-            self.tree.insert_in_tree(Node(RED, node_value, Node(BLACK, -1, None, None), Node(BLACK, -1, None, None)))
 
-        # TODO: tratamento de erro de input
-        # TODO: tornar os numeros dentro da arvore como unique
-        if(self.option == "1"):
-            pass
-        elif(self.option == "2"):
-            pass
         else:
+            # TODO: Tratar se o node foi inserido ou nao
+                # insercao_caso1(node_inser)
+            # TODO: tratamento de erro de input
+
+            if(self.option == "1"):
+                pass
+            elif(self.option == "2"):
+                node_inser = Node(RED, node_value, Node(BLACK, -1, None, None), Node(BLACK, -1, None, None))
+                self.tree.insert_in_tree_RB(node_inser)
+                # self.tree.insert_in_tree(node_inser)
+                # self.tree.insercao_caso1(node_inser)
+            else:
+                node_inser = Node(RED, node_value, None, None)
+                self.tree.insert_in_tree(node_inser)
+            
             self.tree.render(self.background)
+        
         pygame.display.update()
 
     def run(self):
@@ -286,13 +495,12 @@ class Game():
         pygame.quit()
         sys.exit(0)
 
-
 def menu():
     option = 0
     while(option != "1" and option != "2" and option != "3"):
         if(option != 0):
             print("!!!! Opção Inválida !!!!\n")
-        print("\nEscolha o tipo de árvore:\n")
+        print("\nEscolha o tipo de árvore: \n")
         print("1 - Árvore AVL")
         print("2 - Árvore Vermelho e Preto")
         print("3 - Árvore Binária de Busca\n")
