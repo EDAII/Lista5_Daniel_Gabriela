@@ -212,7 +212,7 @@ class Tree():
             while True:
                 parent = temp
                 if self.get_level(parent) >= 5:
-                    print("Erro, insira outro nó")
+                    print('Erro, insira outro nó')
                     break
                 if node.data <= temp.data:
                     right_side = False
@@ -318,7 +318,7 @@ class Tree():
         self.insercao_caso1(node)
 
     def print_node(self, node):
-        print(str(node.data) + " - " + str(node.x_position) + " - " + str(node.y_position) + " - " + str(node.color))
+        print(str(node.data) + ' - ' + str(node.x_position) + ' - ' + str(node.y_position) + ' - ' + str(node.color))
 
 
     def rotacionar_direita(self, node):
@@ -364,7 +364,7 @@ class Tree():
         self.update_pre_order(self.root)
 
     def rotacionar_esquerda(self, node):
-        print("rotacao esquerda")
+        print('rotacao esquerda')
         q = node.node_right
 
         # atualiza o pai de node para o novo filho
@@ -433,7 +433,7 @@ class Tree():
             self.insercao_caso4(node)
 
     def insercao_caso4(self, node):
-        print("caso 4")
+        print('caso 4')
         g = self.grandpa(node)
 
         if node == node.parent.node_right and node.parent == g.node_left:
@@ -447,7 +447,7 @@ class Tree():
         self.insercao_caso5(node)
 
     def insercao_caso5(self, node):
-        print("caso 5")
+        print('caso 5')
         g = self.grandpa(node)
 
         node.parent.color = BLACK
@@ -477,7 +477,7 @@ class Game():
         try:
             pygame.init()
         except:
-            print('The pygame module did not start successfully')
+            print('O modulo pygame não foi iniciado com sucesso!')
 
         self.background = pygame.display.set_mode(SCREEN_SIZE)
         self.background.fill(SCREEN_BACKGROUND_COLOR)
@@ -490,20 +490,20 @@ class Game():
     def render(self):
         self.background.fill(SCREEN_BACKGROUND_COLOR)
 
-        node_value = input("Digite o valor do nó: ")
+        node_value = input('Digite o valor do nó: ')
         try:
             node_value = int(node_value)
 
             if self.tree.verify_exist_value(node_value):
-                print("Este valor já foi inserido na arvore!")
+                print('Este valor já foi inserido na arvore!')
             elif node_value < 0:
-                print("Digite valores positivos!")
+                print('Digite valores positivos!')
             elif node_value > 999:
                 print('Digite numeros menores que 1000!')
             else:
-                if self.option == "1":
+                if self.option == '1':
                     pass
-                elif self.option == "2":
+                elif self.option == '2':
                     nil1 = Node(BLACK, -1, None, None)
                     nil2 = Node(BLACK, -1, None, None)
                     node_inser = Node(RED, node_value, nil1, nil2)
@@ -513,8 +513,8 @@ class Game():
                     self.tree.insert_in_tree(node_inser)
         
         except ValueError:
-            print("That's not an int!")
-            print("No.. input string is not an Integer. It's a string")  
+            print('Isso não é um inteiro!')
+            print('Não.. o input não é um inteiro. É uma string.')  
         
         self.tree.render(self.background)
         
@@ -539,13 +539,13 @@ class Game():
 
 def menu():
     option = 0
-    while(option != "1" and option != "2" and option != "3"):
+    while(option != '1' and option != '2' and option != '3'):
         if(option != 0):
-            print("!!!! Opção Inválida !!!!\n")
-        print("\nEscolha o tipo de árvore: \n")
-        print("1 - Árvore AVL")
-        print("2 - Árvore Vermelho e Preto")
-        print("3 - Árvore Binária de Busca\n")
+            print('!!!! Opção Inválida !!!!\n')
+        print('\nEscolha o tipo de árvore: \n')
+        print('1 - Árvore AVL')
+        print('2 - Árvore Vermelho e Preto')
+        print('3 - Árvore Binária de Busca\n')
         option = input()
     return option
 
