@@ -108,6 +108,19 @@ class Tree():
     def get_level(self, node):
         return self.get_level_util(self.root, node.data, 1)
 
+    # A function to preorder update pos in screen
+    def update_pre_order(self, node): 
+        if node != None: 
+    
+            # First print the data of node 
+            self.update_sons(node), 
+    
+            # Then recur on left child 
+            self.update_pre_order(node.node_left) 
+    
+            # Finally recur on right child 
+            self.update_pre_order(node.node_right) 
+
     def search_to_son_right(self, node):
         if self.root.data == node.data or self.root == None:
             return ((WIDTH + self.root.x_position) // 2, self.root.y_position + Y_DISTANCE)
@@ -348,10 +361,12 @@ class Tree():
             
         (node.x_position, node.y_position) = self.search_to_son_right(node.parent)
         (q.node_left.x_position, q.node_left.y_position) = self.search_to_son_left(q.node_left.parent)
-        self.update_sons(q.node_left)
-        self.update_sons(node)
-        self.update_sons(node.node_left)
-        self.update_sons(node.node_right)
+        # self.update_sons(q.node_left)
+        # self.update_sons(q.node_right)
+        # self.update_sons(node)
+        # self.update_sons(node.node_left)
+        # self.update_sons(node.node_right)
+        self.update_pre_order(self.root)
 
     def rotacionar_esquerda(self, node):
         print("rotacao esquerda")
@@ -394,10 +409,12 @@ class Tree():
             
         (node.x_position, node.y_position) = self.search_to_son_left(node.parent)
         (q.node_right.x_position, q.node_right.y_position) = self.search_to_son_right(q.node_right.parent)
-        self.update_sons(q.node_right)
-        self.update_sons(node)
-        self.update_sons(node.node_left)
-        self.update_sons(node.node_right)
+        # self.update_sons(q.node2_right)
+        # self.update_sons(q.node_left)
+        # self.update_sons(node)
+        # self.update_sons(node.node_left)
+        # self.update_sons(node.node_right)
+        self.update_pre_order(self.root)
 
     def insercao_caso1(self, node):
         if node.parent == None:
@@ -443,7 +460,6 @@ class Tree():
     def insercao_caso5(self, node):
         print("caso 5")
         g = self.grandpa(node)
-        print(g)
 
         node.parent.color = BLACK
         g.color = RED
@@ -548,3 +564,4 @@ if __name__ == '__main__':
         main()
     except KeyboardInterrupt:
         print('Interruption')
+        # n_nodes = [30, 20, 15, 10, 5, 12, 18, 19, 17, 25, 23, 24, 21, 28, 27, 29, 40, 45, 50, 55, 35, 33, 38, 43, 31, 34, 36, 39, 42, 44, 48]
