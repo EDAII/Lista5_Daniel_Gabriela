@@ -686,29 +686,29 @@ class Game():
                     if event.key == pygame.K_ESCAPE:
                         exit = True
                     if event.key == pygame.K_RETURN and len(self.input_box.text) > 0:
-                        #try:
-                        node_value = int(self.input_box.text)
-                        if self.tree.verify_exist_value(node_value):
-                            print('Este valor já foi inserido na arvore!')
-                        elif node_value < 0:
-                            print('Digite valores positivos!')
-                        elif node_value > 999:
-                            print('Digite numeros menores que 1000!')
-                        else:
-                            if self.option == '1':
-                                node_inser = Node(BLUE, node_value, None, None)
-                                self.tree.insert_in_tree_avl(node_inser)
-                            elif self.option == '2':
-                                nil1 = Node(BLACK, -1, None, None)
-                                nil2 = Node(BLACK, -1, None, None)
-                                node_inser = Node(RED, node_value, nil1, nil2)
-                                self.tree.insert_in_tree_RB(node_inser)
+                        try:
+                            node_value = int(self.input_box.text)
+                            if self.tree.verify_exist_value(node_value):
+                                print('Este valor já foi inserido na arvore!')
+                            elif node_value < 0:
+                                print('Digite valores positivos!')
+                            elif node_value > 999:
+                                print('Digite numeros menores que 1000!')
                             else:
-                                node_inser = Node(ORANGE, node_value, None, None)
-                                self.tree.insert_in_tree(node_inser)
-                        # except ValueError:
-                        #    print('Isso não é um inteiro!')
-                        #    print('Não.. o input não é um inteiro. É uma string.')
+                                if self.option == '1':
+                                    node_inser = Node(BLUE, node_value, None, None)
+                                    self.tree.insert_in_tree_avl(node_inser)
+                                elif self.option == '2':
+                                    nil1 = Node(BLACK, -1, None, None)
+                                    nil2 = Node(BLACK, -1, None, None)
+                                    node_inser = Node(RED, node_value, nil1, nil2)
+                                    self.tree.insert_in_tree_RB(node_inser)
+                                else:
+                                    node_inser = Node(ORANGE, node_value, None, None)
+                                    self.tree.insert_in_tree(node_inser)
+                        except ValueError:
+                           print('Isso não é um inteiro!')
+                           print('Não.. o input não é um inteiro. É uma string.')
                 self.input_box.handle_event(event)
 
             self.render()
