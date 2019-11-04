@@ -1,7 +1,6 @@
 import sys
 import pygame
 import random
-import copy
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -59,10 +58,10 @@ class Node():
     
     def render(self, background):
         circle = pygame.draw.circle(background, self.color, [self.x_position, self.y_position], self.size)
-        circle.center = (self.x_position + self.size//2 + 5, self.y_position + self.size//2 + 7)
+        circle.center = (self.x_position + self.size//2, self.y_position + self.size//2 + 7)
 
         font = pygame.font.Font('freesansbold.ttf', 15)
-        text = font.render(str('{:02d}'.format(self.data)), True, WHITE, self.color)
+        text = font.render(str('{:03d}'.format(self.data)), True, WHITE, self.color)
 
         background.blit(text, circle)
 
@@ -361,18 +360,12 @@ class Tree():
             
         (node.x_position, node.y_position) = self.search_to_son_right(node.parent)
         (q.node_left.x_position, q.node_left.y_position) = self.search_to_son_left(q.node_left.parent)
-        # self.update_sons(q.node_left)
-        # self.update_sons(q.node_right)
-        # self.update_sons(node)
-        # self.update_sons(node.node_left)
-        # self.update_sons(node.node_right)
+
         self.update_pre_order(self.root)
 
     def rotacionar_esquerda(self, node):
         print("rotacao esquerda")
         q = node.node_right
-        print(self.search_to_son_left(node))
-        print(self.search_to_son_right(node))
 
         # atualiza o pai de node para o novo filho
         if node.parent != None:
@@ -409,11 +402,7 @@ class Tree():
             
         (node.x_position, node.y_position) = self.search_to_son_left(node.parent)
         (q.node_right.x_position, q.node_right.y_position) = self.search_to_son_right(q.node_right.parent)
-        # self.update_sons(q.node2_right)
-        # self.update_sons(q.node_left)
-        # self.update_sons(node)
-        # self.update_sons(node.node_left)
-        # self.update_sons(node.node_right)
+
         self.update_pre_order(self.root)
 
     def insercao_caso1(self, node):
@@ -501,27 +490,33 @@ class Game():
     def render(self):
         self.background.fill(SCREEN_BACKGROUND_COLOR)
 
-        node_value = int(input("Digite o valor do nó:"))
+        node_value = input("Digite o valor do nó: ")
+        try:
+            node_value = int(node_value)
 
-        if self.tree.verify_exist_value(node_value):
-            print("Este valor já foi inserido na arvore")
-
-        else:
-            # TODO: Tratar se o node foi inserido ou nao
-            # TODO: tratamento de erro de input
-
-            if(self.option == "1"):
-                pass
-            elif(self.option == "2"):
-                nil1 = Node(BLACK, -1, None, None)
-                nil2 = Node(BLACK, -1, None, None)
-                node_inser = Node(RED, node_value, nil1, nil2)
-                self.tree.insert_in_tree_RB(node_inser)
+            if self.tree.verify_exist_value(node_value):
+                print("Este valor já foi inserido na arvore!")
+            elif node_value < 0:
+                print("Digite valores positivos!")
+            elif node_value > 999:
+                print('Digite numeros menores que 1000!')
             else:
-                node_inser = Node(RED, node_value, None, None)
-                self.tree.insert_in_tree(node_inser)
-            
-            self.tree.render(self.background)
+                if self.option == "1":
+                    pass
+                elif self.option == "2":
+                    nil1 = Node(BLACK, -1, None, None)
+                    nil2 = Node(BLACK, -1, None, None)
+                    node_inser = Node(RED, node_value, nil1, nil2)
+                    self.tree.insert_in_tree_RB(node_inser)
+                else:
+                    node_inser = Node(RED, node_value, None, None)
+                    self.tree.insert_in_tree(node_inser)
+        
+        except ValueError:
+            print("That's not an int!")
+            print("No.. input string is not an Integer. It's a string")  
+        
+        self.tree.render(self.background)
         
         pygame.display.update()
 
