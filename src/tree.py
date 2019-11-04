@@ -31,6 +31,51 @@ WIDTH = 1330
 HEIGHT = 800
 SCREEN_SIZE = (WIDTH, HEIGHT)
 
+class InputBox:
+
+    def __init__(self, x, y, w, h, text='', desc=''):
+        self.rect = pygame.Rect(x, y, w, h)
+        self.color = pygame.Color('lightskyblue3')
+        self.text = text
+        self.label_input = pygame.font.Font(None, 32).render(desc, True, DARKBLUE)
+        self.txt_surface = pygame.font.Font(None, 32).render(text, True, self.color)
+        self.active = False
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            # If the user clicked on the self.input_box rect.
+            if self.rect.collidepoint(event.pos):
+                # Toggle the active variable.
+                self.active = not self.active
+            else:
+                self.active = False
+            # Change the current color of the input box.
+            self.color = pygame.Color('dodgerblue2') if self.active else pygame.Color('lightskyblue3')
+        if event.type == pygame.KEYDOWN:
+            if self.active:
+                # if event.key == pygame.K_RETURN:
+                #    print(self.text)
+                #    self.text = ''
+                if event.key == pygame.K_BACKSPACE:
+                    self.text = self.text[:-1]
+                elif event.key != pygame.K_RETURN and event.key != pygame.K_TAB and len(self.text) < 18:
+                    self.text += event.unicode
+                # Re-render the text.
+                self.txt_surface = pygame.font.Font(None, 32).render(self.text, True, self.color)
+
+    def update(self):
+        # Resize the box if the text is too long.
+        width = max(200, self.txt_surface.get_width()+10)
+        self.rect.w = width
+
+    def draw(self, screen):
+        # Blit the text.
+        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        # Blit the rect.
+        pygame.draw.rect(screen, self.color, self.rect, 2)
+
+        screen.blit(self.label_input, (self.rect.x, self.rect.y - 30))
+
 
 class Edge():
     def __init__(self, from_node, to_node):
@@ -487,37 +532,42 @@ class Game():
         self.option = option
         self.tree = Tree()
 
+        self.input_box = InputBox(10, 600, 250, 32, '', 'Digite o valor do nó e aperte Enter para inserir (Valor entre 0 e 999)')
+
     def render(self):
         self.background.fill(SCREEN_BACKGROUND_COLOR)
 
-        node_value = input('Digite o valor do nó: ')
-        try:
-            node_value = int(node_value)
-
-            if self.tree.verify_exist_value(node_value):
-                print('Este valor já foi inserido na arvore!')
-            elif node_value < 0:
-                print('Digite valores positivos!')
-            elif node_value > 999:
-                print('Digite numeros menores que 1000!')
-            else:
-                if self.option == '1':
-                    pass
-                elif self.option == '2':
-                    nil1 = Node(BLACK, -1, None, None)
-                    nil2 = Node(BLACK, -1, None, None)
-                    node_inser = Node(RED, node_value, nil1, nil2)
-                    self.tree.insert_in_tree_RB(node_inser)
-                else:
-                    node_inser = Node(RED, node_value, None, None)
-                    self.tree.insert_in_tree(node_inser)
+        self.input_box.draw(self.background)
+        self.input_box.update()
         
-        except ValueError:
-            print('Isso não é um inteiro!')
-            print('Não.. o input não é um inteiro. É uma string.')  
+        # node_value = input('Digite o valor do nó: ')
+        # try:
+        #     node_value = int(node_value)
+
+        #     if self.tree.verify_exist_value(node_value):
+        #         print('Este valor já foi inserido na arvore!')
+        #     elif node_value < 0:
+        #         print('Digite valores positivos!')
+        #     elif node_value > 999:
+        #         print('Digite numeros menores que 1000!')
+        #     else:
+        #         if self.option == '1':
+        #             pass
+        #         elif self.option == '2':
+        #             nil1 = Node(BLACK, -1, None, None)
+        #             nil2 = Node(BLACK, -1, None, None)
+        #             node_inser = Node(RED, node_value, nil1, nil2)
+        #             self.tree.insert_in_tree_RB(node_inser)
+        #         else:
+        #             node_inser = Node(RED, node_value, None, None)
+        #             self.tree.insert_in_tree(node_inser)
+        
+        # except ValueError:
+        #     print('Isso não é um inteiro!')
+        #     print('Não.. o input não é um inteiro. É uma string.')
         
         self.tree.render(self.background)
-        
+
         pygame.display.update()
 
     def run(self):
@@ -529,8 +579,31 @@ class Game():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         exit = True
-            
-            # TODO: render rodar sobre thread
+                    if event.key == pygame.K_RETURN and len(self.input_box.text) > 0:
+                        try:
+                            node_value = int(self.input_box.text)
+                            if self.tree.verify_exist_value(node_value):
+                                print('Este valor já foi inserido na arvore!')
+                            elif node_value < 0:
+                                print('Digite valores positivos!')
+                            elif node_value > 999:
+                                print('Digite numeros menores que 1000!')
+                            else:
+                                if self.option == '1':
+                                    pass
+                                elif self.option == '2':
+                                    nil1 = Node(BLACK, -1, None, None)
+                                    nil2 = Node(BLACK, -1, None, None)
+                                    node_inser = Node(RED, node_value, nil1, nil2)
+                                    self.tree.insert_in_tree_RB(node_inser)
+                                else:
+                                    node_inser = Node(RED, node_value, None, None)
+                                    self.tree.insert_in_tree(node_inser)
+                        except ValueError:
+                            print('Isso não é um inteiro!')
+                            print('Não.. o input não é um inteiro. É uma string.')
+                self.input_box.handle_event(event)
+
             self.render()
             pygame.display.update()
 
