@@ -46,9 +46,9 @@ class Edge():
 
 class Node():
     def __init__(self, color, data, node_left, node_right):
-        self.y_position = None
         self.x_position = None
-        
+        self.y_position = None
+
         self.size = NODE_SIZE
         self.color = color
         self.data = data
@@ -108,6 +108,69 @@ class Tree():
     def get_level(self, node):
         return self.get_level_util(self.root, node.data, 1)
 
+    def search_to_son_right(self, node):
+        if self.root.data == node.data or self.root == None:
+            return ((WIDTH + self.root.x_position) // 2, self.root.y_position + Y_DISTANCE)
+        
+        else:
+            temp = self.root
+            right_side = True
+            left_side = True
+
+            while True:
+                parent = temp
+
+                if node.data <= temp.data and temp.data != -1:
+                    right_side = False
+                    temp = temp.node_left
+
+                    if temp.data == node.data:
+                        return ((node.x_position + node.parent.x_position) // 2, node.y_position + Y_DISTANCE)
+                elif node.data > temp.data and temp.data != -1:
+                    left_side = False
+                    temp = temp.node_right
+
+                    if temp.data == node.data:
+                        if right_side:
+                            return ((WIDTH + node.x_position) // 2, node.y_position + Y_DISTANCE)
+                        else:
+                            return (((node.x_position + node.parent.x_position) // 2) + (node.x_position - node.parent.x_position), node.y_position + Y_DISTANCE)
+        
+    
+    def search_to_son_left(self, node):
+        if self.root.data == node.data or self.root == None:
+            return (self.root.x_position // 2, self.root.y_position + Y_DISTANCE)
+        else:
+            temp = self.root
+            right_side = True
+            left_side = True
+
+            while True:
+                parent = temp
+
+                if node.data <= temp.data and temp.data != -1:
+                    right_side = False
+                    temp = temp.node_left
+
+                    if temp.data == node.data:
+                        if left_side:
+                            return (node.x_position // 2, node.y_position + Y_DISTANCE)
+                        else:
+                            return (((node.x_position + node.parent.x_position) // 2) - (node.parent.x_position - node.x_position), node.y_position + Y_DISTANCE)
+
+                elif node.data > temp.data and temp.data != -1:
+                    left_side = False
+                    temp = temp.node_right
+
+                    if temp.data == node.data:
+                        return ((node.x_position + node.parent.x_position) // 2, node.y_position + Y_DISTANCE)
+
+    def update_sons(self, node):
+        if node.node_left != None:
+            (node.node_left.x_position, node.node_left.y_position) = self.search_to_son_left(node)
+        if node.node_right != None:
+            (node.node_right.x_position, node.node_right.y_position) = self.search_to_son_right(node)
+
     def insert_in_tree(self, node):
         if self.root == None:
             self.root = node
@@ -119,14 +182,15 @@ class Tree():
                 self.append_node(node.node_right)
                 self.edges.append(Edge(node, node.node_right))
                 node.node_right.parent = node
-                node.node_right.x_position = node.x_position + 30
-                node.node_right.y_position = node.y_position + Y_DISTANCE
+                (node.node_left.x_position, node.node_left.y_position) = self.search_to_son_left(node)
+                (node.node_right.x_position, node.node_right.y_position) = self.search_to_son_right(node)
+
             if node.node_left != None:
                 self.append_node(node.node_left)
                 self.edges.append(Edge(node, node.node_left))
                 node.node_left.parent = node
-                node.node_left.x_position = node.x_position - 30
-                node.node_left.y_position = node.y_position + Y_DISTANCE
+                (node.node_left.x_position, node.node_left.y_position) = self.search_to_son_left(node)
+                (node.node_right.x_position, node.node_right.y_position) = self.search_to_son_right(node)
 
         else:
             temp = self.root
@@ -144,7 +208,6 @@ class Tree():
 
                     if temp != None:
                         if temp.data == -1:
-
                             self.edges.remove(self.get_edge(parent, temp))
                             self.nodes.remove(temp)
                             temp = None
@@ -156,26 +219,24 @@ class Tree():
 
                         self.edges.append(Edge(parent, node))
 
+                        node.y_position = parent.y_position + Y_DISTANCE
                         if left_side:
                             node.x_position = parent.x_position // 2
                         elif node == parent.node_left and parent == parent.parent.node_left:
                             node.x_position = ((parent.x_position + parent.parent.x_position) // 2) - (parent.parent.x_position - parent.x_position)
                         else:
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
-                        node.y_position = parent.y_position + Y_DISTANCE
                         
                         if node.node_right != None:
                             self.append_node(node.node_right)
                             self.edges.append(Edge(node, node.node_right))
                             node.node_right.parent = node
-                            node.node_right.x_position = node.x_position + 30
-                            node.node_right.y_position = node.y_position + Y_DISTANCE
+                            (node.node_right.x_position, node.node_right.y_position) = self.search_to_son_right(node)
                         if node.node_left != None:
                             self.append_node(node.node_left)
                             self.edges.append(Edge(node, node.node_left))
                             node.node_left.parent = node
-                            node.node_left.x_position = node.x_position - 30
-                            node.node_left.y_position = node.y_position + Y_DISTANCE
+                            (node.node_left.x_position, node.node_left.y_position) = self.search_to_son_left(node)
                         return
                 else:
                     left_side = False
@@ -195,26 +256,24 @@ class Tree():
 
                         self.edges.append(Edge(parent, node))
 
+                        node.y_position = parent.y_position + Y_DISTANCE
                         if right_side:
                             node.x_position = (WIDTH + parent.x_position) // 2
                         elif node == parent.node_right and parent == parent.parent.node_right:
                             node.x_position = ((parent.x_position + parent.parent.x_position) // 2) + (parent.x_position - parent.parent.x_position)
                         else:
                             node.x_position = (parent.x_position + parent.parent.x_position) // 2
-                        node.y_position = parent.y_position + Y_DISTANCE
                         
                         if node.node_right != None:
                             self.append_node(node.node_right)
                             self.edges.append(Edge(node, node.node_right))
                             node.node_right.parent = node
-                            node.node_right.x_position = node.x_position + 30
-                            node.node_right.y_position = node.y_position + Y_DISTANCE
+                            (node.node_right.x_position, node.node_right.y_position) = self.search_to_son_right(node)
                         if node.node_left != None:
                             self.append_node(node.node_left)
                             self.edges.append(Edge(node, node.node_left))
                             node.node_left.parent = node
-                            node.node_left.x_position = node.x_position - 30
-                            node.node_left.y_position = node.y_position + Y_DISTANCE
+                            (node.node_left.x_position, node.node_left.y_position) = self.search_to_son_left(node)
                         return
 
     def grandpa(self, node):
@@ -231,10 +290,7 @@ class Tree():
         else:
             return self.grandpa(node).node_left
 
-################################################################
-    
     def get_node_array(self, value):
-        print(value)
         for node in self.nodes:
             if node.data == value:
                 return node        
@@ -252,67 +308,11 @@ class Tree():
     def print_node(self, node):
         print(str(node.data) + " - " + str(node.x_position) + " - " + str(node.y_position) + " - " + str(node.color))
 
-    def insert_in_node_position(self, node1, node2):
-        temp = node1.copy()
-        node1.x_position = node2.x_position
-        node1.y_position = node2.y_position
-        node2.x_position = temp.x_position
-        node2.y_position = temp.y_position
-
-        #TODO atualizar pai
-        #TODO atualizar arestas
-# ---------------------------------------------------------------
-    # def rotacionar_direita(self, node):
-        # q = copy.copy(node.node_left)
-        # temp = copy.copy(q.node_right)
-
-        # self.print_node(node)
-        # self.print_node(q)
-        # self.print_node(temp)
-
-        # print("----------------")
-
-        # # node.node_right = node
-        # self.insert_in_node_position(node.node_right, node)
-        # # node.node_left = temp
-        # self.insert_in_node_position(node.node_left, temp)
-        # # node = q
-        # self.insert_in_node_position(node, q)
-
-
-        # self.print_node(node)
-        # self.print_node(q)
-        # self.print_node(temp)
-
-    # def rotacionar_esquerda(self, node):
-    #     print("rot esq")
-
-    #     x = copy.copy(node.node_right)
-
-    #     # node.node_right = x.node_left
-    #     self.insert_in_node_position(node.node_right, x.node_left)
-    #     # x.node_left = node
-    #     self.insert_in_node_position(x.node_left, node)        
-    #     x.color = node.color
-    #     node.color = RED
-
-    # # # # def rotacionar_direita(node):
-    # # # # x = node.node_left
-    # # # # node.node_left = x.node_right
-    # # # # x.node_right = node
-    # # # # x.color = node.color
-    # # # # node.color = RED
-
-    # # # # def rotacionar_esquerda(node):
-    # # # #     x = node.node_right
-    # # # #     node.node_right = x.node_left
-    # # # #     x.node_left = node
-    # # # #     x.color = node.color
-    # # # #     node.color = RED
 
     def rotacionar_direita(self, node):
         print('rotacao direita')
         q = node.node_left
+
         # atualiza o pai de node para o novo filho
         if node.parent != None:
             if node == node.parent.node_left:
@@ -324,22 +324,40 @@ class Tree():
                 node.parent.node_right = q
                 self.edges.append(Edge(node.parent, q))
             # fim da atualizacao
+        q.parent = node.parent
 
         self.edges.remove(self.get_edge(q, q.node_right))
-        node.node_left = q.node_right
-        self.edges.append(Edge(node, q.node_right))
-
         self.edges.remove(self.get_edge(node, q))
+        
+        node.node_left = q.node_right
+        q.node_right.parent = node
+        self.edges.append(Edge(node, q.node_right))
 
         q.node_right = node
         self.edges.append(Edge(q, node))
-        q.parent = node.parent
         node.parent = q
 
+        if q.parent == None:
+            self.root = q
+            (q.x_position, q.y_position) = (WIDTH // 2, MARGIN)
+        else:
+            if q == q.parent.node_left:
+                (q.x_position, q.y_position) = self.search_to_son_left(q.parent)
+            else:
+                (q.x_position, q.y_position) = self.search_to_son_right(q.parent)
+            
+        (node.x_position, node.y_position) = self.search_to_son_right(node.parent)
+        (q.node_left.x_position, q.node_left.y_position) = self.search_to_son_left(q.node_left.parent)
+        self.update_sons(q.node_left)
+        self.update_sons(node)
+        self.update_sons(node.node_left)
+        self.update_sons(node.node_right)
 
     def rotacionar_esquerda(self, node):
         print("rotacao esquerda")
         q = node.node_right
+        print(self.search_to_son_left(node))
+        print(self.search_to_son_right(node))
 
         # atualiza o pai de node para o novo filho
         if node.parent != None:
@@ -352,17 +370,34 @@ class Tree():
                 node.parent.node_right = q
                 self.edges.append(Edge(node.parent, q))
             # fim da atualizacao
+        q.parent = node.parent
 
         self.edges.remove(self.get_edge(q, q.node_left))
-        node.node_right = q.node_left
-        self.edges.append(Edge(node, q.node_left))
-
         self.edges.remove(self.get_edge(node, q))
+
+        node.node_right = q.node_left
+        q.node_left.parent = node
+        self.edges.append(Edge(node, q.node_left))
 
         q.node_left = node
         self.edges.append(Edge(q, node))
-        q.parent = node.parent
         node.parent = q
+        
+        if q.parent == None:
+            self.root = q
+            (q.x_position, q.y_position) = (WIDTH // 2, MARGIN)
+        else:
+            if q == q.parent.node_left:
+                (q.x_position, q.y_position) = self.search_to_son_left(q.parent)
+            else:
+                (q.x_position, q.y_position) = self.search_to_son_right(q.parent)
+            
+        (node.x_position, node.y_position) = self.search_to_son_left(node.parent)
+        (q.node_right.x_position, q.node_right.y_position) = self.search_to_son_right(q.node_right.parent)
+        self.update_sons(q.node_right)
+        self.update_sons(node)
+        self.update_sons(node.node_left)
+        self.update_sons(node.node_right)
 
     def insercao_caso1(self, node):
         if node.parent == None:
@@ -415,7 +450,6 @@ class Tree():
         if node == node.parent.node_left and node.parent == g.node_left:
             self.rotacionar_direita(g)
         else:
-            # aqui eh: node == node.parent.node_right and node.parent == g.node_right
             self.rotacionar_esquerda(g)
 
     def black_height_recursive(node):
@@ -426,8 +460,6 @@ class Tree():
             else:
                 altura = max(self.black_height_recursive(node.node_left), self.black_height_recursive(node.node_right))
         return altura
-
-# --------------------------------------------------------------
 
     def render(self, background):
         for edge in self.edges:
@@ -460,16 +492,15 @@ class Game():
 
         else:
             # TODO: Tratar se o node foi inserido ou nao
-                # insercao_caso1(node_inser)
             # TODO: tratamento de erro de input
 
             if(self.option == "1"):
                 pass
             elif(self.option == "2"):
-                node_inser = Node(RED, node_value, Node(BLACK, -1, None, None), Node(BLACK, -1, None, None))
+                nil1 = Node(BLACK, -1, None, None)
+                nil2 = Node(BLACK, -1, None, None)
+                node_inser = Node(RED, node_value, nil1, nil2)
                 self.tree.insert_in_tree_RB(node_inser)
-                # self.tree.insert_in_tree(node_inser)
-                # self.tree.insercao_caso1(node_inser)
             else:
                 node_inser = Node(RED, node_value, None, None)
                 self.tree.insert_in_tree(node_inser)
