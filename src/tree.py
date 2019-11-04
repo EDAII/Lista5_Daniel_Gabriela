@@ -152,6 +152,11 @@ class Tree():
     def get_level(self, node):
         return self.get_level_util(self.root, node.data, 1)
 
+    def get_node_by_data(self, data):
+        for node in self.nodes:
+            if node.data == data:
+                return node
+
     # A function to preorder update pos in screen
     def update_pre_order(self, node): 
         if node != None: 
@@ -233,7 +238,7 @@ class Tree():
             self.root = node
             self.root.x_position = WIDTH // 2
             self.root.y_position = MARGIN
-
+                        
             self.append_node(node)
             if node.node_right != None:
                 self.append_node(node.node_right)
@@ -272,6 +277,7 @@ class Tree():
                     if temp == None:
                         parent.node_left = node
                         node.parent = parent
+
                         self.append_node(node)
 
                         self.edges.append(Edge(parent, node))
@@ -353,11 +359,6 @@ class Tree():
                 return node        
         return None
 
-    def remove_background_node(self, node):
-        for n in self.nodes:
-            if node.x_position == n.x_position and node.y_position == n.y_position:
-                self.nodes.remove(n)
-
     def insert_in_tree_RB(self, node):
         self.insert_in_tree(node)
         self.insercao_caso1(node)
@@ -365,6 +366,14 @@ class Tree():
     def print_node(self, node):
         print(str(node.data) + ' - ' + str(node.x_position) + ' - ' + str(node.y_position) + ' - ' + str(node.color))
 
+    # def black_height_recursive(node):
+    #     altura = 0
+    #     if node != None:
+    #         if no.color == BLACK:
+    #             altura = 1 + max(self.black_height_recursive(node.node_left), self.black_height_recursive(node.node_right))
+    #         else:
+    #             altura = max(self.black_height_recursive(node.node_left), self.black_height_recursive(node.node_right))
+    #     return altura
 
     def rotacionar_direita(self, node):
         print('rotacao direita')
@@ -502,14 +511,137 @@ class Tree():
         else:
             self.rotacionar_esquerda(g)
 
-    def black_height_recursive(node):
-        altura = 0
-        if node != None:
-            if no.color == BLACK:
-                altura = 1 + max(self.black_height_recursive(node.node_left), self.black_height_recursive(node.node_right))
+    def rotacao_esquerda_avl(self, node):
+        print('rotacao esquerda avl')
+        q = node.node_right
+
+        # atualiza o pai de node para o novo filho
+        if node.parent != None:
+            if node == node.parent.node_left:
+                self.edges.remove(self.get_edge(node.parent, node.parent.node_left))
+                node.parent.node_left = q
+                self.edges.append(Edge(node.parent, q))
+            elif node == node.parent.node_right:
+                self.edges.remove(self.get_edge(node.parent, node.parent.node_right))
+                node.parent.node_right = q
+                self.edges.append(Edge(node.parent, q))
+            # fim da atualizacao
+        q.parent = node.parent
+
+        if q.node_left != None:
+            self.edges.remove(self.get_edge(q, q.node_left))
+            node.node_right = q.node_left
+            q.node_left.parent = node
+            self.edges.append(Edge(node, q.node_left))
+        else:
+            node.node_right = None
+        
+        self.edges.remove(self.get_edge(node, q))
+
+        q.node_left = node
+        self.edges.append(Edge(q, node))
+        node.parent = q
+        
+        if q.parent == None:
+            self.root = q
+            (q.x_position, q.y_position) = (WIDTH // 2, MARGIN)
+        else:
+            if q == q.parent.node_left:
+                (q.x_position, q.y_position) = self.search_to_son_left(q.parent)
             else:
-                altura = max(self.black_height_recursive(node.node_left), self.black_height_recursive(node.node_right))
-        return altura
+                (q.x_position, q.y_position) = self.search_to_son_right(q.parent)
+            
+        (node.x_position, node.y_position) = self.search_to_son_left(node.parent)
+        
+        if q.node_right != None:
+            (q.node_right.x_position, q.node_right.y_position) = self.search_to_son_right(q.node_right.parent)
+
+        self.update_pre_order(self.root)
+
+    def rotacao_direita_avl(self, node):
+        print('rotacao direita avl')
+        q = node.node_left
+
+        # atualiza o pai de node para o novo filho
+        if node.parent != None:
+            if node == node.parent.node_left:
+                self.edges.remove(self.get_edge(node.parent, node.parent.node_left))
+                node.parent.node_left = q
+                self.edges.append(Edge(node.parent, q))
+            else:
+                self.edges.remove(self.get_edge(node.parent, node.parent.node_right))
+                node.parent.node_right = q
+                self.edges.append(Edge(node.parent, q))
+            # fim da atualizacao
+        q.parent = node.parent
+
+        if q.node_right != None:
+            self.edges.remove(self.get_edge(q, q.node_right))
+            node.node_left = q.node_right
+            q.node_right.parent = node
+            self.edges.append(Edge(node, q.node_right))
+        else:
+            node.node_left = None
+        
+        self.edges.remove(self.get_edge(node, q))
+
+        q.node_right = node
+        self.edges.append(Edge(q, node))
+        node.parent = q
+
+        if q.parent == None:
+            self.root = q
+            (q.x_position, q.y_position) = (WIDTH // 2, MARGIN)
+        else:
+            if q == q.parent.node_left:
+                (q.x_position, q.y_position) = self.search_to_son_left(q.parent)
+            else:
+                (q.x_position, q.y_position) = self.search_to_son_right(q.parent)
+            
+        (node.x_position, node.y_position) = self.search_to_son_right(node.parent)
+        
+        if q.node_left != None:
+            (q.node_left.x_position, q.node_left.y_position) = self.search_to_son_left(q.node_left.parent)
+
+        self.update_pre_order(self.root)
+
+    def get_height(self, node):
+        if node == None:
+            return 0
+        
+        lh = self.get_height(node.node_left)
+        rh = self.get_height(node.node_right)
+        
+        return 1 + max(lh, rh)
+
+    def get_balance_factor(self, node):
+        if node == None:
+            return 0
+  
+        return self.get_height(node.node_right) - self.get_height(node.node_left)
+
+    def rebalance_aux(self, node):
+        fb = self.get_balance_factor(node)
+
+        if fb < -1:
+            if self.get_balance_factor(node.node_left) > 0:
+                self.rotacao_esquerda_avl(node.node_left)
+            self.rotacao_direita_avl(node)
+        elif fb > 1:
+            if self.get_balance_factor(node.node_right) < 0:
+                self.rotacao_direita_avl(node.node_right)
+            self.rotacao_esquerda_avl(node)
+
+    def rebalance_tree(self, node):
+        if node == None:
+            return
+        self.rebalance_aux(node)
+        if node.parent != None:
+            self.rebalance_tree(node.parent)
+
+    def insert_in_tree_avl(self, node):
+        self.insert_in_tree(node)
+        self.rebalance_tree(node)
 
     def render(self, background):
         for edge in self.edges:
@@ -540,32 +672,6 @@ class Game():
         self.input_box.draw(self.background)
         self.input_box.update()
         
-        # node_value = input('Digite o valor do nó: ')
-        # try:
-        #     node_value = int(node_value)
-
-        #     if self.tree.verify_exist_value(node_value):
-        #         print('Este valor já foi inserido na arvore!')
-        #     elif node_value < 0:
-        #         print('Digite valores positivos!')
-        #     elif node_value > 999:
-        #         print('Digite numeros menores que 1000!')
-        #     else:
-        #         if self.option == '1':
-        #             pass
-        #         elif self.option == '2':
-        #             nil1 = Node(BLACK, -1, None, None)
-        #             nil2 = Node(BLACK, -1, None, None)
-        #             node_inser = Node(RED, node_value, nil1, nil2)
-        #             self.tree.insert_in_tree_RB(node_inser)
-        #         else:
-        #             node_inser = Node(RED, node_value, None, None)
-        #             self.tree.insert_in_tree(node_inser)
-        
-        # except ValueError:
-        #     print('Isso não é um inteiro!')
-        #     print('Não.. o input não é um inteiro. É uma string.')
-        
         self.tree.render(self.background)
 
         pygame.display.update()
@@ -580,28 +686,29 @@ class Game():
                     if event.key == pygame.K_ESCAPE:
                         exit = True
                     if event.key == pygame.K_RETURN and len(self.input_box.text) > 0:
-                        try:
-                            node_value = int(self.input_box.text)
-                            if self.tree.verify_exist_value(node_value):
-                                print('Este valor já foi inserido na arvore!')
-                            elif node_value < 0:
-                                print('Digite valores positivos!')
-                            elif node_value > 999:
-                                print('Digite numeros menores que 1000!')
+                        #try:
+                        node_value = int(self.input_box.text)
+                        if self.tree.verify_exist_value(node_value):
+                            print('Este valor já foi inserido na arvore!')
+                        elif node_value < 0:
+                            print('Digite valores positivos!')
+                        elif node_value > 999:
+                            print('Digite numeros menores que 1000!')
+                        else:
+                            if self.option == '1':
+                                node_inser = Node(BLUE, node_value, None, None)
+                                self.tree.insert_in_tree_avl(node_inser)
+                            elif self.option == '2':
+                                nil1 = Node(BLACK, -1, None, None)
+                                nil2 = Node(BLACK, -1, None, None)
+                                node_inser = Node(RED, node_value, nil1, nil2)
+                                self.tree.insert_in_tree_RB(node_inser)
                             else:
-                                if self.option == '1':
-                                    pass
-                                elif self.option == '2':
-                                    nil1 = Node(BLACK, -1, None, None)
-                                    nil2 = Node(BLACK, -1, None, None)
-                                    node_inser = Node(RED, node_value, nil1, nil2)
-                                    self.tree.insert_in_tree_RB(node_inser)
-                                else:
-                                    node_inser = Node(RED, node_value, None, None)
-                                    self.tree.insert_in_tree(node_inser)
-                        except ValueError:
-                            print('Isso não é um inteiro!')
-                            print('Não.. o input não é um inteiro. É uma string.')
+                                node_inser = Node(ORANGE, node_value, None, None)
+                                self.tree.insert_in_tree(node_inser)
+                        # except ValueError:
+                        #    print('Isso não é um inteiro!')
+                        #    print('Não.. o input não é um inteiro. É uma string.')
                 self.input_box.handle_event(event)
 
             self.render()
