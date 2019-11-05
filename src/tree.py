@@ -102,13 +102,26 @@ class Node():
         self.node_right = node_right
     
     def render(self, background):
-        circle = pygame.draw.circle(background, self.color, [self.x_position, self.y_position], self.size)
-        circle.center = (self.x_position + self.size//2, self.y_position + self.size//2 + 7)
+        if self.data != -1:
+            circle = pygame.draw.circle(background, self.color, [self.x_position, self.y_position], self.size)
+            circle.center = (self.x_position + self.size//2, self.y_position + self.size//2 + 7)
 
-        font = pygame.font.Font('freesansbold.ttf', 15)
-        text = font.render(str('{:03d}'.format(self.data)), True, WHITE, self.color)
+            font = pygame.font.Font('freesansbold.ttf', 15)
+            text = font.render(str('{:03d}'.format(self.data)), True, WHITE, self.color)
 
-        background.blit(text, circle)
+            background.blit(text, circle)
+        else:
+            if(self.parent.node_left == self):
+                rect = pygame.draw.rect(background, self.color, (self.x_position - 15, self.y_position, 30, 20))
+                rect.center = (self.x_position + 8, self.y_position + 13)
+            else:
+                rect = pygame.draw.rect(background, self.color, (self.x_position - 15, self.y_position, 30, 20))
+                rect.center = (self.x_position + 10, self.y_position + 13)
+
+            font = pygame.font.Font('freesansbold.ttf', 12)
+            text = font.render('nil', True, WHITE, self.color)
+
+            background.blit(text, rect)
 
     def __str__(self):
         return str(self.data)
@@ -688,6 +701,8 @@ class Game():
                     if event.key == pygame.K_RETURN and len(self.input_box.text) > 0:
                         try:
                             node_value = int(self.input_box.text)
+                            self.input_box.text = ''
+
                             if self.tree.verify_exist_value(node_value):
                                 print('Este valor já foi inserido na arvore!')
                             elif node_value < 0:
@@ -710,7 +725,7 @@ class Game():
                            print('Isso não é um inteiro!')
                            print('Não.. o input não é um inteiro. É uma string.')
                 self.input_box.handle_event(event)
-
+            
             self.render()
             pygame.display.update()
 
